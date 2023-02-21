@@ -2,6 +2,7 @@ import {
   createContext,
   PropsWithChildren,
   useContext,
+  useEffect,
   useReducer,
   useState,
 } from "react";
@@ -26,22 +27,40 @@ export const GlobalContextProvider = (props: PropsWithChildren) => {
   const remove = (id: number) => {
     dispatch({ type: "REMOVE", payload: id });
   };
-const increase =(id:number)=>{
-  dispatch({ type: "INCREASE", payload: id });
+  const increase = (id: number) => {
+    dispatch({ type: "INCREASE", payload: id });
+  };
+  const decrease = (id: number) => {
+    dispatch({ type: "DECREASE", payload: id });
+  };
+  const fetchData = async () => {
+    dispatch({ type: "LOADING" });
+    const res = await fetch(url);
+    const cart = await res.json();
+    console.log(cart)
+    dispatch({ type: "DISPLAY_ITEMS", payload: cart });
+  };
 
-}
-const decrease =(id:number)=>{
-  dispatch({ type: "DECREASE", payload: id });
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-}
+  const toggleAmount = (id: number, type: string) => {
+    dispatch({ type: "TOGGLE_AMOUNT", payload: { id, type } });
+  };
+
+  useEffect(() => {
+    dispatch({ type: "GET_TOTALS" });
+  }, [state.cart]);
   return (
     <GlobalContext.Provider
       value={{
         ...state,
         clearCart,
-        remove, 
-        increase, 
-        decrease
+        remove,
+        increase,
+        decrease,
+        toggleAmount,
       }}
     >
       {props.children}
